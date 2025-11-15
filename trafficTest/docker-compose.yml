@@ -6,6 +6,9 @@ services:
       - "8080:8080" # 로컬 8080 <-> 컨테이너 8080
     environment:
       - JAVA_OPTS=-Xms512m -Xmx2g # (1GB 힙으로 시작)
+      - XX:InitiatingHeapOccupancyPercent=30
+      - Xlog:gc*:file=gc_log
+      - XX:+UseShenandoahGC
     networks:
       - monitoring-net
 
