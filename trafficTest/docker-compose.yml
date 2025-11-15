@@ -1,0 +1,41 @@
+services:
+  my-api-server:
+    build: . # 현재 디렉토리의 Dockerfile을 사용
+    container_name: my-api-server
+    ports:
+      - "8080:8080" # 로컬 8080 <-> 컨테이너 8080
+    environment:
+      - JAVA_OPTS=-Xms512m -Xmx2g # (1GB 힙으로 시작)
+      - XX:InitiatingHeapOccupancyPercent=30
+      - Xlog:gc*:file=gc_log
+      - XX:+UseShenandoahGC
+    networks:
+      - monitoring-net
+
+  # 2. Prometheus (3단계 설정파일 사용)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090" # 로컬 9090 <-> Prometheus
+    volumes:
+      # 현재 디렉토리의 prometheus.yml을 컨테이너 내부로 마운트
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - monitoring-net
+
+  # 3. Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000" # 로컬 3000 <-> Grafana
+    networks:
+      - monitoring-net
+    volumes:
+      - ./grafana-data:/var/lib/grafana
+
+# 컨테이너들이 서로 통신할 네트워크
+networks:
+  monitoring-net:
+    driver: bridge
