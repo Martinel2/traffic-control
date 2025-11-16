@@ -2,7 +2,7 @@
 
 ## 대규모 트래픽 제어 실험실 - 우테코 오픈미션
 
-## 실행환경
+## 실행 환경
 
 * java 21
 * springboot 3.5.7
@@ -10,6 +10,26 @@
 * prometheus
 * grafana
 * k6
+
+## 실행 방법
+
+docker-compose.yml이 있는 곳에서 터미널을 연다.
+
+도커가 없다면 도커를 설치한다.
+
+먼저, 이 프로젝트의 jar파일을 만든다.
+```bash
+./gradlew bootjar
+```
+
+그 후, 도커에 prometheus,grafana,spring-boot 서버를 올린다.
+```bash
+docker compose up -d --build
+```
+
+http://localhost:3000에 접속하여 grafana를 확인한다.
+
+- 초기 아이디 비밀번호는 admin/admin이며, 수정가능하다.
 
 
 
@@ -34,17 +54,17 @@
 
 
 * 추가적으로 다음 옵션을 추가함.
-* \- XX:InitiatingHeapOccupancyPercent=30 (GC가 힙이 30퍼만 차도 시작되도록 함)
-* \- Xlog:gc\*:file=gc\_log (gc log파일을 저장함)
-* \- XX:+UseShenandoahGC (Shenandoah GC 활성화 옵션)
+    * \- XX:InitiatingHeapOccupancyPercent=30 (GC가 힙이 30퍼만 차도 시작되도록 함)
+    * \- Xlog:gc\*:file=gc\_log (gc log파일을 저장함)
+    * \- XX:+UseShenandoahGC (Shenandoah GC 활성화 옵션)
 
 
 
 이유 : CPU를 좀 더 많이 쓰더라도 대용량 트래픽을 지연없이 처리하기 위해서
 
-XX:InitiatingHeapOccupancyPercent=30으로 GC가 더 빨리 실행되도록하여 멈춤 시간을 줄임
+- XX:InitiatingHeapOccupancyPercent=30으로 GC가 더 빨리 실행되도록하여 멈춤 시간을 줄임
 
-XX:+UseShenandoahGC로 throughput(CPU 사용량)을 감수하고 지연 시간을 챙기는 GC옵션이라고 조사됨
+- XX:+UseShenandoahGC로 throughput(CPU 사용량)을 감수하고 지연 시간을 챙기는 GC옵션이라고 조사됨
 
 
 
@@ -80,7 +100,7 @@ XX:+UseShenandoahGC로 throughput(CPU 사용량)을 감수하고 지연 시간�
 - JVM 사용량, GC 멈춤 시간 둘다 엄청나게 늘어남.
 - 사용량은 1.의 최적조합에서 최대 40,000,000이였던 반면, 2.에서는 150,000,000을 넘는 사용량을 보임.
 - 멈춤시간 또한 1.의 최적조합에서 최대 0.015초 미만에 지속시간 약 1분 15초였던 반면,
-멈춤시간 약 0.0360초에 지속시간 3분으로 성능 저하가 발생함.
+  멈춤시간 약 0.0360초에 지속시간 3분으로 성능 저하가 발생함.
 
 => n+1문제를 한 번에 모두 가져오는 방식으로 처리하면 객체가 증가하여 성능저하가 발생했음.
 => 또한, GC 최적화 문제도 결국 로그가 쌓여서 메모리를 차지하게되므로, 멈춤을 조장하는 사태가 발생.
@@ -113,3 +133,24 @@ XX:+UseShenandoahGC로 throughput(CPU 사용량)을 감수하고 지연 시간�
 
 => 그러면 여기서 튜닝 옵션을 빼고 돌리면 어떻게 될까?
 
+### 추가 실험 결과
+
+- 옵션을 모두 제거한 경우
+    - k6통계가 가장 좋았음.
+    - 다만, 그래프 상으로 멈춤시간이 0.01초 늘어남.
+    - 또한, 사용량도 튀는 현상이 발생함.
+
+
+- Shenandoah GC만 사용한 경우
+    - 애매한 결과가 나옴.
+    - 그래프상으로도, k6 통계도 지금까지 통계의 평균치인 것 같음.
+    - 강점이 크게 부각되지 않는 느낌이 들었음.
+
+
+## 결론
+
+- '대용량' 트래픽을 제어한다면 디폴트 옵션이 생각보다 좋음.
+- '동시 접속의 대용량' 트래픽을 제어한다면 JVM GC를 튜닝해보는 것이 좋음.
+- 코드를 작성할 때, 메모리를 생각하며, 효율적으로 작동하도록 코드를 구성하기.
+- 하드웨어가 좋아졌다지만, 최적화는 항상 옳다.
+- 아주 짧은 시간동안 진행된 프로젝트여서 아직 모르는 옵션이나 정보가 많을 것 같음. 더 깊게 공부를 해봐야 할 듯하다.
