@@ -1,0 +1,10 @@
+<configuration>
+    <appender name="USER_LOG_FILE" class="ch.qos.logback.core.FileAppender">
+        <file>user_process_log.txt</file> <append>true</append> <encoder>
+        <pattern>%msg%n</pattern> </encoder>
+    </appender>
+
+    <logger name="USER_LOG" level="INFO" additivity="false">
+        <appender-ref ref="USER_LOG_FILE" />
+    </logger>
+</configuration>
