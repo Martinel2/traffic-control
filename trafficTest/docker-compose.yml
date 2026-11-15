@@ -4,11 +4,13 @@ services:
     container_name: my-api-server
     ports:
       - "8080:8080" # 로컬 8080 <-> 컨테이너 8080
+    # 메모리 제한을 고정해 옵션이 없을 때의 기본 최대 힙(제한의 25% = 1GB)도 실험마다 같게 한다.
+    mem_limit: 4g
     environment:
-      - JAVA_OPTS=-Xms512m -Xmx2g # (1GB 힙으로 시작)
-      - XX:InitiatingHeapOccupancyPercent=30
-      - Xlog:gc*:file=gc_log
-      - XX:+UseShenandoahGC
+      # JVM 옵션은 JAVA_TOOL_OPTIONS로 넘겨야 java가 읽는다. 값은 실행할 때 JVM_OPTS로 바꾼다.
+      # 예: JVM_OPTS="-Xms512m -Xmx2g -XX:+UseShenandoahGC" docker compose up -d --build
+      # 적용 여부 확인: docker exec my-api-server jcmd 1 VM.flags
+      - JAVA_TOOL_OPTIONS=${JVM_OPTS:-}
     networks:
       - monitoring-net
 
