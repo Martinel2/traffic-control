@@ -14,7 +14,9 @@ export const options = {
 
 export default function () {
     // 우리가 만든 '최악의' API를 호출합니다 (optimized=false)
-    const res = http.get('http://localhost:8080/api/process');
+    // BASE_URL로 대상 서버를 바꿀 수 있습니다 (도커 네트워크 안에서 k6를 돌릴 때 http://my-api-server:8080)
+    const baseUrl = __ENV.BASE_URL || 'http://localhost:8080';
+    const res = http.get(`${baseUrl}/api/process`);
 
     // 응답이 성공(200 OK)했는지 확인합니다.
     check(res, { 'status was 200': (r) => r.status == 200 });

@@ -1,0 +1,5 @@
+build
+.gradle
+grafana-data
+*.log
+gc_log*
