@@ -1,0 +1,2 @@
+1:
+-XX:CICompilerCount=4 -XX:InitialHeapSize=536870912 -XX:InitiatingHeapOccupancyPercent=30 -XX:MaxHeapSize=1073741824 -XX:MinHeapDeltaBytes=524288 -XX:MinHeapSize=536870912 -XX:NonNMethodCodeHeapSize=5839564 -XX:NonProfiledCodeHeapSize=122909338 -XX:ProfiledCodeHeapSize=122909338 -XX:ReservedCodeCacheSize=251658240 -XX:+SegmentedCodeCache -XX:SoftMaxHeapSize=1073741824 -XX:+UseCompressedOops -XX:-UseNUMA -XX:-UseNUMAInterleaving -XX:+UseShenandoahGC 
